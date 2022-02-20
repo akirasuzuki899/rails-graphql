@@ -1,0 +1,36 @@
+version: "3"
+services:
+  app:
+    build:
+      context: ./back
+      dockerfile: Dockerfile.rails
+    container_name: rails
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ./back:/back
+    depends_on:
+      - db
+    environment:
+      TZ: Asia/Tokyo
+    ports:      
+      - 3000:3000
+    stdin_open: true
+    tty: true
+
+  db:
+    build: 
+      context: ./back
+      dockerfile: Dockerfile.mysql
+    container_name: mysql
+    command: mysqld --skip-character-set-client-handshake --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'test_app_development'
+      TZ: 'Asia/Tokyo'
+    ports:
+      - "3306:3306"
+volumes:
+  mysql-data:
+    driver: local
